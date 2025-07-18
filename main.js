@@ -1,3 +1,6 @@
+import { PizzaService } from './src/services/PizzaService.js';
+import { PedidoService } from './src/services/PedidoService.js';
+
 // Menu data
 const menuItems = [
   {
