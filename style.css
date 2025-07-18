@@ -588,6 +588,387 @@ body {
   color: #bdc3c7;
 }
 
+/* Checkout Modal */
+.checkout-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-modal.active {
+  display: flex;
+}
+
+.checkout-content {
+  background: white;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.checkout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.checkout-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.close-checkout {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #7f8c8d;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-checkout:hover {
+  background: #f8f9fa;
+  color: #e74c3c;
+}
+
+.checkout-steps {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.step.active,
+.step.completed {
+  opacity: 1;
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #bdc3c7;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: #e74c3c;
+}
+
+.step.completed .step-number {
+  background: #27ae60;
+}
+
+.step-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.checkout-body {
+  padding: 1.5rem;
+}
+
+.step-content h4 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.form-group input:readonly {
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-group input {
+  flex: 1;
+}
+
+.search-cep-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.search-cep-btn:hover {
+  background: #c0392b;
+}
+
+.delivery-info {
+  margin-top: 1rem;
+}
+
+.info-card {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #e74c3c;
+}
+
+.info-card h5 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-card p {
+  margin: 0.25rem 0;
+  color: #6c757d;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.prev-step-btn,
+.next-step-btn,
+.finish-order-btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prev-step-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.prev-step-btn:hover {
+  background: #5a6268;
+}
+
+.next-step-btn,
+.finish-order-btn {
+  background: #e74c3c;
+  color: white;
+  flex: 1;
+  justify-content: center;
+}
+
+.next-step-btn:hover,
+.finish-order-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+.order-summary {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.order-summary h5 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+.summary-line.total {
+  border-top: 1px solid #dee2e6;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.payment-methods {
+  margin-bottom: 1.5rem;
+}
+
+.payment-option {
+  margin-bottom: 0.5rem;
+}
+
+.payment-option input[type="radio"] {
+  display: none;
+}
+
+.payment-option label {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 1rem;
+}
+
+.payment-option input[type="radio"]:checked + label {
+  border-color: #e74c3c;
+  background: #fff5f5;
+}
+
+.payment-option label i {
+  font-size: 1.5rem;
+  color: #e74c3c;
+}
+
+.payment-option label div {
+  flex: 1;
+}
+
+.payment-option label strong {
+  display: block;
+  color: #2c3e50;
+  margin-bottom: 0.2rem;
+}
+
+.payment-option label small {
+  color: #6c757d;
+}
+
+.pix-payment {
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.pix-payment h5 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.qr-code {
+  margin: 1rem 0;
+}
+
+.qr-code img {
+  max-width: 200px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.pix-code {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.pix-code input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.pix-code button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pix-code button:hover {
+  background: #c0392b;
+}
+
+.pix-info {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.pix-info p {
+  margin: 0.25rem 0;
+  color: #6c757d;
+}
+
 /* Footer */
 .footer {
   background: #2c3e50;
@@ -647,5 +1028,28 @@ body {
   .cart-content {
     width: 95%;
     margin: 1rem;
+  }
+  
+  .checkout-content {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .checkout-steps {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .step {
+    margin: 0;
   }
 }

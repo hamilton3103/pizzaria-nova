@@ -1,5 +1,6 @@
 import { PizzaService } from './src/services/PizzaService.js';
 import { PedidoService } from './src/services/PedidoService.js';
+import { CheckoutModal } from './src/components/CheckoutModal.js';
 
 // Menu data
 const menuItems = [
@@ -90,6 +91,9 @@ const cartItems = document.getElementById('cart-items');
 const cartTotal = document.getElementById('cart-total');
 const checkoutBtn = document.getElementById('checkout-btn');
 const filterBtns = document.querySelectorAll('.filter-btn');
+
+// Checkout modal instance
+let checkoutModal = null;
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -268,20 +272,16 @@ function setupEventListeners() {
 function checkout() {
   if (cart.length === 0) return;
   
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const orderText = cart.map(item => 
-    `${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
-  ).join('\n');
-  
-  const message = `🍕 *Pedido da Pizzaria Bella Vista*\n\n${orderText}\n\n*Total: R$ ${total.toFixed(2).replace('.', ',')}*\n\nObrigado pelo seu pedido!`;
-  
-  const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(message)}`;
-  window.open(whatsappUrl, '_blank');
-  
-  // Clear cart after order
-  cart = [];
-  updateCartUI();
+  // Fechar modal do carrinho
   cartModal.classList.remove('active');
+  
+  // Abrir modal de checkout
+  checkoutModal = new CheckoutModal();
+  const modal = checkoutModal.createModal();
+  modal.classList.add('active');
+  
+  // Tornar checkoutModal global para acesso nos event handlers
+  window.checkoutModal = checkoutModal;
 }
 
 // Scroll to menu function
@@ -323,3 +323,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   images.forEach(img => imageObserver.observe(img));
 });
+
+// Tornar funções globais para acesso nos event handlers
+window.addToCart = addToCart;
+window.removeFromCart = removeFromCart;
+window.updateQuantity = updateQuantity;
+window.checkout = checkout;
+window.scrollToMenu = scrollToMenu;
