@@ -1,5 +1,5 @@
 // Importar serviços
-import './src/services/DatabaseService.js';
+import { DatabaseService } from './src/services/DatabaseService.js';
 import './src/services/PaymentService.js';
 import './src/services/CepService.js';
 import './src/services/SmsService.js';
