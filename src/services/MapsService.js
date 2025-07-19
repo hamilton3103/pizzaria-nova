@@ -1,4 +1,4 @@
-class MapsService {
+export class MapsService {
   constructor() {
     this.pizzariaAddress = 'Rua das Pizzas, 123 - Centro, São Paulo - SP';
     this.pizzariaCoords = { lat: -23.5505, lng: -46.6333 };
