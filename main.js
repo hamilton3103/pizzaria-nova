@@ -29,15 +29,22 @@ const cartTotal = document.getElementById('cart-total');
 const checkoutBtn = document.getElementById('checkout-btn');
 const filterBtns = document.querySelectorAll('.filter-btn');
 
-// Checkout modal instance
-let checkoutModal = null;
-
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
   loadMenuItems();
   setupEventListeners();
   updateCartUI();
+  initializeMap();
 });
+
+// Inicializar mapa
+async function initializeMap() {
+  try {
+    await mapsService.initializeMap('map');
+  } catch (error) {
+    console.error('Erro ao inicializar mapa:', error);
+  }
+}
 
 // Carregar itens do menu
 async function loadMenuItems() {
@@ -46,7 +53,6 @@ async function loadMenuItems() {
     renderMenu();
   } catch (error) {
     console.error('Erro ao carregar menu:', error);
-    // Fallback para dados estáticos se necessário
     menuItems = [];
     renderMenu();
   }
@@ -58,7 +64,7 @@ function renderMenu(filter = 'all') {
   
   const filteredItems = filter === 'all' 
     ? menuItems 
-    : menuItems.filter(item => item.category === filter);
+    : menuItems.filter(item => item.categoria === filter);
   
   filteredItems.forEach(item => {
     const menuItemElement = createMenuItemElement(item);
@@ -71,12 +77,12 @@ function createMenuItemElement(item) {
   const div = document.createElement('div');
   div.className = 'menu-item';
   div.innerHTML = `
-    <img src="${item.imagem || item.image}" alt="${item.nome || item.name}" loading="lazy">
+    <img src="${item.imagem}" alt="${item.nome}" loading="lazy">
     <div class="menu-item-content">
-      <h3>${item.nome || item.name}</h3>
-      <p>${item.descricao || item.description}</p>
+      <h3>${item.nome}</h3>
+      <p>${item.descricao}</p>
       <div class="menu-item-footer">
-        <span class="price">R$ ${(item.preco || item.price).toFixed(2).replace('.', ',')}</span>
+        <span class="price">R$ ${item.preco.toFixed(2).replace('.', ',')}</span>
         <button class="add-to-cart" onclick="addToCart(${item.id})">
           <i class="fas fa-plus"></i>
           Adicionar
@@ -94,20 +100,10 @@ function addToCart(itemId) {
   
   const existingItem = cart.find(cartItem => cartItem.id === itemId);
   
-  // Normalizar propriedades do item
-  const normalizedItem = {
-    id: item.id,
-    name: item.nome || item.name,
-    description: item.descricao || item.description,
-    price: item.preco || item.price,
-    image: item.imagem || item.image,
-    category: item.categoria || item.category
-  };
-  
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    cart.push({ ...normalizedItem, quantity: 1 });
+    cart.push({ ...item, quantity: 1 });
   }
   
   updateCartUI();
@@ -135,12 +131,10 @@ function updateQuantity(itemId, change) {
 
 // Update cart UI
 function updateCartUI() {
-  // Update cart count
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   cartCount.textContent = totalItems;
   cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
   
-  // Update cart items
   if (cart.length === 0) {
     cartItems.innerHTML = `
       <div class="empty-cart">
@@ -153,10 +147,10 @@ function updateCartUI() {
   } else {
     cartItems.innerHTML = cart.map(item => `
       <div class="cart-item">
-        <img src="${item.image}" alt="${item.name}">
+        <img src="${item.imagem}" alt="${item.nome}">
         <div class="cart-item-info">
-          <h4>${item.name}</h4>
-          <p>R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+          <h4>${item.nome}</h4>
+          <p>R$ ${item.preco.toFixed(2).replace('.', ',')}</p>
         </div>
         <div class="cart-item-controls">
           <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
@@ -169,8 +163,7 @@ function updateCartUI() {
       </div>
     `).join('');
     
-    // Update total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
     cartTotal.textContent = total.toFixed(2).replace('.', ',');
     checkoutBtn.style.display = 'flex';
   }
@@ -186,7 +179,6 @@ function showCartAnimation() {
 
 // Setup event listeners
 function setupEventListeners() {
-  // Cart modal
   cartIcon.addEventListener('click', () => {
     cartModal.classList.add('active');
   });
@@ -201,23 +193,17 @@ function setupEventListeners() {
     }
   });
   
-  // Filter buttons
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Remove active class from all buttons
       filterBtns.forEach(b => b.classList.remove('active'));
-      // Add active class to clicked button
       btn.classList.add('active');
-      // Filter menu
       const filter = btn.getAttribute('data-filter');
       renderMenu(filter);
     });
   });
   
-  // Checkout
   checkoutBtn.addEventListener('click', checkout);
   
-  // Smooth scrolling for navigation
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -234,16 +220,12 @@ function setupEventListeners() {
 function checkout() {
   if (cart.length === 0) return;
   
-  // Fechar modal do carrinho
   cartModal.classList.remove('active');
-  
-  // Criar modal de checkout simplificado
   createSimpleCheckoutModal();
 }
 
 // Criar modal de checkout simplificado
 function createSimpleCheckoutModal() {
-  // Remover modal existente se houver
   const existingModal = document.getElementById('checkout-modal');
   if (existingModal) {
     existingModal.remove();
@@ -267,13 +249,13 @@ function createSimpleCheckoutModal() {
           <div class="order-items">
             ${cart.map(item => `
               <div class="order-item">
-                <span>${item.quantity}x ${item.name}</span>
-                <span>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
+                <span>${item.quantity}x ${item.nome}</span>
+                <span>R$ ${(item.preco * item.quantity).toFixed(2).replace('.', ',')}</span>
               </div>
             `).join('')}
           </div>
           <div class="order-total">
-            <strong>Total: R$ ${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2).replace('.', ',')}</strong>
+            <strong>Total: R$ ${cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0).toFixed(2).replace('.', ',')}</strong>
           </div>
         </div>
         
@@ -286,6 +268,13 @@ function createSimpleCheckoutModal() {
           <div class="form-group">
             <label>Telefone:</label>
             <input type="tel" id="customer-phone" placeholder="(11) 99999-9999" required>
+          </div>
+          <div class="form-group">
+            <label>CEP:</label>
+            <input type="text" id="customer-cep" placeholder="00000-000" maxlength="9">
+            <button type="button" onclick="searchCep()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Buscar Endereço
+            </button>
           </div>
           <div class="form-group">
             <label>Endereço:</label>
@@ -322,6 +311,32 @@ function createSimpleCheckoutModal() {
   document.body.appendChild(modal);
 }
 
+// Buscar CEP
+async function searchCep() {
+  const cepInput = document.getElementById('customer-cep');
+  const addressInput = document.getElementById('customer-address');
+  const cep = cepInput.value.trim();
+
+  if (!cep) {
+    alert('Digite um CEP válido');
+    return;
+  }
+
+  try {
+    const result = await cepService.calculateDeliveryFee(cep);
+    
+    if (result.success) {
+      const address = result.address;
+      addressInput.value = `${address.logradouro}, ${address.bairro}, ${address.localidade} - ${address.uf}`;
+      alert(`Taxa de entrega: R$ ${result.deliveryFee.toFixed(2)} - Tempo estimado: ${result.estimatedTime}`);
+    } else {
+      alert(result.error);
+    }
+  } catch (error) {
+    alert('Erro ao buscar CEP');
+  }
+}
+
 // Fechar modal de checkout
 function closeCheckoutModal() {
   const modal = document.getElementById('checkout-modal');
@@ -342,14 +357,12 @@ async function finishOrder() {
     return;
   }
 
-  // Criar mensagem para WhatsApp
   const orderItems = cart.map(item => 
-    `${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
+    `${item.quantity}x ${item.nome} - R$ ${(item.preco * item.quantity).toFixed(2).replace('.', ',')}`
   ).join('\n');
   
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
   
-  // Salvar pedido no banco de dados
   try {
     const pedidoData = {
       cliente_nome: name,
@@ -357,10 +370,10 @@ async function finishOrder() {
       cliente_endereco: address,
       itens: cart.map(item => ({
         pizza_id: item.id,
-        nome: item.name,
+        nome: item.nome,
         quantidade: item.quantity,
-        preco_unitario: item.price,
-        subtotal: item.price * item.quantity
+        preco_unitario: item.preco,
+        subtotal: item.preco * item.quantity
       })),
       total: total,
       forma_pagamento: payment,
@@ -370,7 +383,6 @@ async function finishOrder() {
     const result = await databaseService.savePedido(pedidoData);
     console.log('Pedido salvo:', result);
     
-    // Enviar SMS de confirmação
     if (result.success) {
       await smsService.sendOrderConfirmation(phone, {
         id: result.id,
@@ -402,13 +414,11 @@ ${orderItems}
 
 ⏰ Pedido realizado em: ${new Date().toLocaleString('pt-BR')}`;
 
-  // Abrir WhatsApp
-  const whatsappNumber = '5511999999999'; // Substitua pelo número real
+  const whatsappNumber = '5511999999999';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   
   window.open(whatsappUrl, '_blank');
   
-  // Limpar carrinho
   cart = [];
   updateCartUI();
   closeCheckoutModal();
@@ -433,30 +443,7 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Add loading animation for images
-document.addEventListener('DOMContentLoaded', function() {
-  const images = document.querySelectorAll('img[loading="lazy"]');
-  
-  const imageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.style.opacity = '0';
-        img.style.transition = 'opacity 0.3s ease';
-        
-        img.onload = () => {
-          img.style.opacity = '1';
-        };
-        
-        observer.unobserve(img);
-      }
-    });
-  });
-  
-  images.forEach(img => imageObserver.observe(img));
-});
-
-// Tornar funções globais para acesso nos event handlers
+// Tornar funções globais
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.updateQuantity = updateQuantity;
@@ -464,3 +451,4 @@ window.checkout = checkout;
 window.scrollToMenu = scrollToMenu;
 window.closeCheckoutModal = closeCheckoutModal;
 window.finishOrder = finishOrder;
+window.searchCep = searchCep;

@@ -2,18 +2,15 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
     rollupOptions: {
-      // Remover dependências externas que causam problemas no build
-      external: [],
       output: {
-        globals: {}
+        manualChunks: undefined,
       }
     }
   },
-  define: {
-    global: 'globalThis',
-  },
-  // Configurações para build estático
   base: './',
   publicDir: 'public'
 })

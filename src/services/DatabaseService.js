@@ -1,30 +1,12 @@
-// Serviço de banco de dados para frontend (sem dependências Node.js)
+// Serviço de banco de dados simplificado para produção
 export class DatabaseService {
   constructor() {
-    this.isProduction = import.meta.env.PROD;
-    this.apiUrl = this.isProduction ? '/api' : 'http://localhost:3000/api';
+    this.pizzas = this.getMockPizzas();
   }
 
   // Buscar todas as pizzas
   async getAllPizzas() {
-    try {
-      // Em produção, usar dados estáticos
-      if (this.isProduction) {
-        return this.getMockPizzas();
-      }
-      
-      // Em desenvolvimento, tentar API
-      const response = await fetch(`${this.apiUrl}/pizzas`);
-      if (response.ok) {
-        return await response.json();
-      }
-      
-      // Fallback para dados mockados
-      return this.getMockPizzas();
-    } catch (error) {
-      console.warn('Usando dados mockados:', error.message);
-      return this.getMockPizzas();
-    }
+    return Promise.resolve(this.pizzas);
   }
 
   // Buscar pizzas por categoria
@@ -39,42 +21,14 @@ export class DatabaseService {
     return pizzas.find(p => p.id == id) || null;
   }
 
-  // Salvar pedido
+  // Salvar pedido (simulado)
   async savePedido(pedidoData) {
-    try {
-      if (this.isProduction) {
-        // Em produção, simular salvamento
-        return this.simulateSavePedido(pedidoData);
-      }
-      
-      const response = await fetch(`${this.apiUrl}/pedidos`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(pedidoData)
-      });
-      
-      if (response.ok) {
-        return await response.json();
-      }
-      
-      // Fallback para simulação
-      return this.simulateSavePedido(pedidoData);
-    } catch (error) {
-      console.warn('Simulando salvamento de pedido:', error.message);
-      return this.simulateSavePedido(pedidoData);
-    }
-  }
-
-  // Simular salvamento de pedido
-  simulateSavePedido(pedidoData) {
     const orderId = Date.now();
-    console.log('Pedido simulado salvo:', { id: orderId, ...pedidoData });
+    console.log('Pedido salvo:', { id: orderId, ...pedidoData });
     return Promise.resolve({ id: orderId, success: true });
   }
 
-  // Dados mockados das pizzas
+  // Dados das pizzas
   getMockPizzas() {
     return [
       {

@@ -1,10 +1,8 @@
 export class SmsService {
   constructor() {
-    this.apiKey = import.meta.env.VITE_SMS_API_KEY;
-    this.baseURL = import.meta.env.VITE_SMS_API_URL || 'https://api.smsdev.com.br/v1';
+    // Simulação para produção
   }
 
-  // Enviar SMS de confirmação de pedido
   async sendOrderConfirmation(telefone, pedidoData) {
     try {
       const message = this.formatOrderConfirmationMessage(pedidoData);
@@ -18,7 +16,6 @@ export class SmsService {
     }
   }
 
-  // Enviar SMS de atualização de status
   async sendStatusUpdate(telefone, pedidoId, status) {
     try {
       const message = this.formatStatusUpdateMessage(pedidoId, status);
@@ -32,13 +29,10 @@ export class SmsService {
     }
   }
 
-  // Enviar SMS genérico
   async sendSMS(telefone, message) {
     try {
-      // Limpar telefone (remover caracteres especiais)
       const cleanPhone = telefone.replace(/\D/g, '');
       
-      // Validar telefone
       if (cleanPhone.length < 10 || cleanPhone.length > 11) {
         return {
           success: false,
@@ -46,46 +40,14 @@ export class SmsService {
         };
       }
 
-      // Simular envio de SMS (para desenvolvimento)
-      if (import.meta.env.PROD || !this.apiKey || this.apiKey === 'your_sms_api_key_here') {
-        console.log('📱 SMS Simulado para:', cleanPhone);
-        console.log('📝 Mensagem:', message);
-        
-        return {
-          success: true,
-          messageId: `sim_${Date.now()}`,
-          message: 'SMS enviado com sucesso (simulado)'
-        };
-      }
-
-      // Envio real via API
-      const response = await fetch(`${this.baseURL}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          key: this.apiKey,
-          type: 9,
-          number: cleanPhone,
-          msg: message
-        })
-      });
-
-      const data = await response.json();
+      console.log('📱 SMS Simulado para:', cleanPhone);
+      console.log('📝 Mensagem:', message);
       
-      if (data.situacao === 'OK') {
-        return {
-          success: true,
-          messageId: data.id,
-          message: 'SMS enviado com sucesso'
-        };
-      } else {
-        return {
-          success: false,
-          error: data.descricao || 'Erro ao enviar SMS'
-        };
-      }
+      return {
+        success: true,
+        messageId: `sim_${Date.now()}`,
+        message: 'SMS enviado com sucesso (simulado)'
+      };
     } catch (error) {
       console.error('Erro ao enviar SMS:', error);
       return {
@@ -95,7 +57,6 @@ export class SmsService {
     }
   }
 
-  // Formatar mensagem de confirmação de pedido
   formatOrderConfirmationMessage(pedidoData) {
     const itens = pedidoData.itens.map(item => 
       `${item.quantidade}x ${item.nome}`
@@ -107,31 +68,26 @@ Pedido #${pedidoData.id} confirmado!
 Itens: ${itens}
 Total: R$ ${pedidoData.total.toFixed(2)}
 
-Tempo estimado: 30-40 min
-Acompanhe pelo WhatsApp: (11) 99999-9999`;
+Tempo estimado: 30-40 min`;
   }
 
-  // Formatar mensagem de atualização de status
   formatStatusUpdateMessage(pedidoId, status) {
     const statusMessages = {
-      'confirmado': '✅ Seu pedido foi confirmado e está sendo preparado!',
+      'confirmado': '✅ Seu pedido foi confirmado!',
       'preparando': '👨‍🍳 Sua pizza está no forno!',
       'saiu_entrega': '🛵 Seu pedido saiu para entrega!',
-      'entregue': '🎉 Pedido entregue! Obrigado pela preferência!',
-      'cancelado': '❌ Pedido cancelado. Entre em contato conosco.'
+      'entregue': '🎉 Pedido entregue! Obrigado!',
+      'cancelado': '❌ Pedido cancelado.'
     };
 
-    const message = statusMessages[status] || 'Status do pedido atualizado';
+    const message = statusMessages[status] || 'Status atualizado';
 
     return `🍕 Pizzaria Bella Vista
 Pedido #${pedidoId}
 
-${message}
-
-Dúvidas? WhatsApp: (11) 99999-9999`;
+${message}`;
   }
 
-  // Validar número de telefone
   validatePhoneNumber(telefone) {
     const cleanPhone = telefone.replace(/\D/g, '');
     
@@ -142,21 +98,12 @@ Dúvidas? WhatsApp: (11) 99999-9999`;
       };
     }
 
-    // Verificar se é celular (9 no início)
-    if (cleanPhone.length === 11 && cleanPhone[2] !== '9') {
-      return {
-        valid: false,
-        error: 'Número de celular inválido'
-      };
-    }
-
     return {
       valid: true,
       formatted: this.formatPhoneNumber(cleanPhone)
     };
   }
 
-  // Formatar número de telefone
   formatPhoneNumber(telefone) {
     const clean = telefone.replace(/\D/g, '');
     

@@ -6,10 +6,8 @@ export class CepService {
   // Buscar endereço por CEP
   async getAddressByCep(cep) {
     try {
-      // Limpar CEP (remover caracteres especiais)
       const cleanCep = cep.replace(/\D/g, '');
       
-      // Validar formato do CEP
       if (cleanCep.length !== 8) {
         return {
           success: false,
@@ -35,11 +33,7 @@ export class CepService {
           complemento: data.complemento,
           bairro: data.bairro,
           localidade: data.localidade,
-          uf: data.uf,
-          ibge: data.ibge,
-          gia: data.gia,
-          ddd: data.ddd,
-          siafi: data.siafi
+          uf: data.uf
         }
       };
     } catch (error) {
@@ -51,7 +45,7 @@ export class CepService {
     }
   }
 
-  // Calcular taxa de entrega baseada na distância
+  // Calcular taxa de entrega
   async calculateDeliveryFee(cep) {
     try {
       const addressData = await this.getAddressByCep(cep);
@@ -60,24 +54,17 @@ export class CepService {
         return addressData;
       }
 
-      // Simular cálculo de taxa baseado no bairro/região
       const deliveryZones = {
         'Centro': 5.00,
         'Vila Madalena': 7.00,
         'Pinheiros': 7.00,
         'Jardins': 8.00,
-        'Moema': 8.00,
-        'Itaim Bibi': 9.00,
-        'Vila Olímpia': 9.00,
-        'Brooklin': 10.00,
-        'Santo Amaro': 12.00,
-        'Morumbi': 12.00
+        'Moema': 8.00
       };
 
       const bairro = addressData.data.bairro;
-      let deliveryFee = 15.00; // Taxa padrão
+      let deliveryFee = 10.00;
 
-      // Verificar se o bairro está nas zonas especiais
       for (const [zone, fee] of Object.entries(deliveryZones)) {
         if (bairro.toLowerCase().includes(zone.toLowerCase())) {
           deliveryFee = fee;
@@ -100,16 +87,12 @@ export class CepService {
     }
   }
 
-  // Calcular tempo estimado de entrega
   calculateEstimatedTime(deliveryFee) {
-    // Quanto maior a taxa, mais longe e mais tempo
     if (deliveryFee <= 7) return '25-35 minutos';
     if (deliveryFee <= 10) return '35-45 minutos';
-    if (deliveryFee <= 12) return '45-55 minutos';
-    return '55-65 minutos';
+    return '45-55 minutos';
   }
 
-  // Validar se entregamos na região
   async validateDeliveryArea(cep) {
     try {
       const addressData = await this.getAddressByCep(cep);
@@ -118,8 +101,7 @@ export class CepService {
         return addressData;
       }
 
-      // Lista de cidades/regiões que entregamos
-      const deliveryAreas = ['São Paulo', 'Osasco', 'Barueri', 'Carapicuíba'];
+      const deliveryAreas = ['São Paulo', 'Osasco', 'Barueri'];
       const city = addressData.data.localidade;
 
       const delivers = deliveryAreas.some(area => 
