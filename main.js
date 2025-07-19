@@ -1,7 +1,3 @@
-import { PizzaService } from './src/services/PizzaService.js';
-import { PedidoService } from './src/services/PedidoService.js';
-import { CheckoutModal } from './src/components/CheckoutModal.js';
-
 // Menu data
 const menuItems = [
   {
@@ -275,13 +271,150 @@ function checkout() {
   // Fechar modal do carrinho
   cartModal.classList.remove('active');
   
-  // Abrir modal de checkout
-  checkoutModal = new CheckoutModal();
-  const modal = checkoutModal.createModal();
-  modal.classList.add('active');
+  // Criar modal de checkout simplificado
+  createSimpleCheckoutModal();
+}
+
+// Criar modal de checkout simplificado
+function createSimpleCheckoutModal() {
+  // Remover modal existente se houver
+  const existingModal = document.getElementById('checkout-modal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'checkout-modal';
+  modal.className = 'checkout-modal active';
+  modal.innerHTML = `
+    <div class="checkout-content">
+      <div class="checkout-header">
+        <h3>Finalizar Pedido</h3>
+        <button class="close-checkout" onclick="closeCheckoutModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="checkout-body">
+        <div class="order-summary">
+          <h4>Resumo do Pedido</h4>
+          <div class="order-items">
+            ${cart.map(item => `
+              <div class="order-item">
+                <span>${item.quantity}x ${item.name}</span>
+                <span>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="order-total">
+            <strong>Total: R$ ${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2).replace('.', ',')}</strong>
+          </div>
+        </div>
+        
+        <div class="customer-form">
+          <h4>Seus Dados</h4>
+          <div class="form-group">
+            <label>Nome Completo:</label>
+            <input type="text" id="customer-name" placeholder="Digite seu nome" required>
+          </div>
+          <div class="form-group">
+            <label>Telefone:</label>
+            <input type="tel" id="customer-phone" placeholder="(11) 99999-9999" required>
+          </div>
+          <div class="form-group">
+            <label>Endereço:</label>
+            <textarea id="customer-address" placeholder="Rua, número, bairro, cidade" required></textarea>
+          </div>
+        </div>
+        
+        <div class="payment-methods">
+          <h4>Forma de Pagamento</h4>
+          <div class="payment-options">
+            <label class="payment-option">
+              <input type="radio" name="payment" value="pix" checked>
+              <span>💳 PIX</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="money">
+              <span>💵 Dinheiro</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="card">
+              <span>💳 Cartão</span>
+            </label>
+          </div>
+        </div>
+        
+        <button class="finish-order-btn" onclick="finishOrder()">
+          <i class="fab fa-whatsapp"></i>
+          Enviar Pedido via WhatsApp
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+// Fechar modal de checkout
+function closeCheckoutModal() {
+  const modal = document.getElementById('checkout-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Finalizar pedido
+function finishOrder() {
+  const name = document.getElementById('customer-name').value.trim();
+  const phone = document.getElementById('customer-phone').value.trim();
+  const address = document.getElementById('customer-address').value.trim();
+  const payment = document.querySelector('input[name="payment"]:checked').value;
+
+  if (!name || !phone || !address) {
+    alert('Por favor, preencha todos os campos obrigatórios.');
+    return;
+  }
+
+  // Criar mensagem para WhatsApp
+  const orderItems = cart.map(item => 
+    `${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
+  ).join('\n');
   
-  // Tornar checkoutModal global para acesso nos event handlers
-  window.checkoutModal = checkoutModal;
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  const paymentMethods = {
+    'pix': 'PIX',
+    'money': 'Dinheiro',
+    'card': 'Cartão'
+  };
+
+  const message = `🍕 *NOVO PEDIDO - Pizzaria Bella Vista*
+
+👤 *Cliente:* ${name}
+📱 *Telefone:* ${phone}
+📍 *Endereço:* ${address}
+
+🛒 *Itens do Pedido:*
+${orderItems}
+
+💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*
+💳 *Pagamento:* ${paymentMethods[payment]}
+
+⏰ Pedido realizado em: ${new Date().toLocaleString('pt-BR')}`;
+
+  // Abrir WhatsApp
+  const whatsappNumber = '5511999999999'; // Substitua pelo número real
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  
+  window.open(whatsappUrl, '_blank');
+  
+  // Limpar carrinho
+  cart = [];
+  updateCartUI();
+  closeCheckoutModal();
+  
+  alert('Pedido enviado! Você será redirecionado para o WhatsApp.');
 }
 
 // Scroll to menu function
@@ -330,3 +463,5 @@ window.removeFromCart = removeFromCart;
 window.updateQuantity = updateQuantity;
 window.checkout = checkout;
 window.scrollToMenu = scrollToMenu;
+window.closeCheckoutModal = closeCheckoutModal;
+window.finishOrder = finishOrder;
