@@ -2,7 +2,7 @@
 import { DatabaseService } from './src/services/DatabaseService.js';
 import { PaymentService } from './src/services/PaymentService.js';
 import { CepService } from './src/services/CepService.js';
-import './src/services/SmsService.js';
+import { SmsService } from './src/services/SmsService.js';
 import './src/services/MapsService.js';
 
 // Menu data

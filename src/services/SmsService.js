@@ -1,4 +1,4 @@
-class SmsService {
+export class SmsService {
   constructor() {
     // Simulação para produção
   }
