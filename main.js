@@ -1,9 +1,9 @@
 // Importar serviços
-import { DatabaseService } from './src/services/DatabaseService.js';
-import { PaymentService } from './src/services/PaymentService.js';
-import { CepService } from './src/services/CepService.js';
-import { SmsService } from './src/services/SmsService.js';
-import { MapsService } from './src/services/MapsService.js';
+import './src/services/DatabaseService.js';
+import './src/services/PaymentService.js';
+import './src/services/CepService.js';
+import './src/services/SmsService.js';
+import './src/services/MapsService.js';
 
 // Menu data
 let menuItems = [];

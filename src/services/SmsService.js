@@ -1,4 +1,4 @@
-export class SmsService {
+class SmsService {
   constructor() {
     // Simulação para produção
   }
@@ -115,4 +115,3 @@ ${message}`;
     
     return telefone;
   }
-}

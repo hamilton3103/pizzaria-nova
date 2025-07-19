@@ -1,5 +1,5 @@
 // Serviço de banco de dados simplificado para produção
-export class DatabaseService {
+class DatabaseService {
   constructor() {
     this.pizzas = this.getMockPizzas();
   }
@@ -114,4 +114,3 @@ export class DatabaseService {
       }
     ];
   }
-}

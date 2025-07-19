@@ -1,4 +1,4 @@
-export class CepService {
+class CepService {
   constructor() {
     this.baseURL = 'https://viacep.com.br/ws';
   }
@@ -124,4 +124,3 @@ export class CepService {
       };
     }
   }
-}

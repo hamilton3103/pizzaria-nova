@@ -1,4 +1,4 @@
-export class PaymentService {
+class PaymentService {
   constructor() {
     // Simulação para produção
   }
@@ -42,4 +42,3 @@ export class PaymentService {
       }, 1000);
     });
   }
-}

@@ -5,6 +5,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
+    minify: 'terser',
     rollupOptions: {
       output: {
         manualChunks: undefined,
@@ -12,5 +13,9 @@ export default defineConfig({
     }
   },
   base: './',
-  publicDir: 'public'
+  publicDir: 'public',
+  server: {
+    port: 3000,
+    host: true
+  }
 })
