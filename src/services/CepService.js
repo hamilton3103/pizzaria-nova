@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 export class CepService {
   constructor() {
     this.baseURL = 'https://viacep.com.br/ws';
@@ -19,9 +17,10 @@ export class CepService {
         };
       }
 
-      const response = await axios.get(`${this.baseURL}/${cleanCep}/json/`);
+      const response = await fetch(`${this.baseURL}/${cleanCep}/json/`);
+      const data = await response.json();
       
-      if (response.data.erro) {
+      if (data.erro) {
         return {
           success: false,
           error: 'CEP não encontrado'
@@ -31,16 +30,16 @@ export class CepService {
       return {
         success: true,
         data: {
-          cep: response.data.cep,
-          logradouro: response.data.logradouro,
-          complemento: response.data.complemento,
-          bairro: response.data.bairro,
-          localidade: response.data.localidade,
-          uf: response.data.uf,
-          ibge: response.data.ibge,
-          gia: response.data.gia,
-          ddd: response.data.ddd,
-          siafi: response.data.siafi
+          cep: data.cep,
+          logradouro: data.logradouro,
+          complemento: data.complemento,
+          bairro: data.bairro,
+          localidade: data.localidade,
+          uf: data.uf,
+          ibge: data.ibge,
+          gia: data.gia,
+          ddd: data.ddd,
+          siafi: data.siafi
         }
       };
     } catch (error) {

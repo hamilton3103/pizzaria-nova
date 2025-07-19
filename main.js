@@ -1,81 +1,22 @@
+// Importar serviços
+import { DatabaseService } from './src/services/DatabaseService.js';
+import { PaymentService } from './src/services/PaymentService.js';
+import { CepService } from './src/services/CepService.js';
+import { SmsService } from './src/services/SmsService.js';
+import { MapsService } from './src/services/MapsService.js';
+
 // Menu data
-const menuItems = [
-  {
-    id: 1,
-    name: "Margherita",
-    description: "Molho de tomate, mussarela, manjericão fresco e azeite",
-    price: 35.90,
-    image: "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg",
-    category: "tradicional"
-  },
-  {
-    id: 2,
-    name: "Pepperoni",
-    description: "Molho de tomate, mussarela e pepperoni",
-    price: 42.90,
-    image: "https://images.pexels.com/photos/1146760/pexels-photo-1146760.jpeg",
-    category: "tradicional"
-  },
-  {
-    id: 3,
-    name: "Quatro Queijos",
-    description: "Mussarela, gorgonzola, parmesão e provolone",
-    price: 45.90,
-    image: "https://images.pexels.com/photos/708587/pexels-photo-708587.jpeg",
-    category: "especial"
-  },
-  {
-    id: 4,
-    name: "Portuguesa",
-    description: "Presunto, ovos, cebola, azeitona e ervilha",
-    price: 39.90,
-    image: "https://images.pexels.com/photos/1049626/pexels-photo-1049626.jpeg",
-    category: "tradicional"
-  },
-  {
-    id: 5,
-    name: "Frango com Catupiry",
-    description: "Frango desfiado, catupiry e milho",
-    price: 41.90,
-    image: "https://images.pexels.com/photos/2147491/pexels-photo-2147491.jpeg",
-    category: "especial"
-  },
-  {
-    id: 6,
-    name: "Calabresa",
-    description: "Calabresa, cebola e azeitona",
-    price: 37.90,
-    image: "https://images.pexels.com/photos/1552635/pexels-photo-1552635.jpeg",
-    category: "tradicional"
-  },
-  {
-    id: 7,
-    name: "Vegetariana",
-    description: "Abobrinha, berinjela, pimentão, tomate e rúcula",
-    price: 38.90,
-    image: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
-    category: "especial"
-  },
-  {
-    id: 8,
-    name: "Chocolate",
-    description: "Chocolate ao leite e granulado",
-    price: 32.90,
-    image: "https://images.pexels.com/photos/4109111/pexels-photo-4109111.jpeg",
-    category: "doce"
-  },
-  {
-    id: 9,
-    name: "Banana com Canela",
-    description: "Banana, canela, açúcar e leite condensado",
-    price: 29.90,
-    image: "https://images.pexels.com/photos/4109943/pexels-photo-4109943.jpeg",
-    category: "doce"
-  }
-];
+let menuItems = [];
 
 // Cart functionality
 let cart = [];
+
+// Services
+const databaseService = new DatabaseService();
+const paymentService = new PaymentService();
+const cepService = new CepService();
+const smsService = new SmsService();
+const mapsService = new MapsService();
 
 // DOM elements
 const menuGrid = document.getElementById('menu-grid');
@@ -93,10 +34,23 @@ let checkoutModal = null;
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
-  renderMenu();
+  loadMenuItems();
   setupEventListeners();
   updateCartUI();
 });
+
+// Carregar itens do menu
+async function loadMenuItems() {
+  try {
+    menuItems = await databaseService.getAllPizzas();
+    renderMenu();
+  } catch (error) {
+    console.error('Erro ao carregar menu:', error);
+    // Fallback para dados estáticos se necessário
+    menuItems = [];
+    renderMenu();
+  }
+}
 
 // Render menu items
 function renderMenu(filter = 'all') {
@@ -117,12 +71,12 @@ function createMenuItemElement(item) {
   const div = document.createElement('div');
   div.className = 'menu-item';
   div.innerHTML = `
-    <img src="${item.image}" alt="${item.name}" loading="lazy">
+    <img src="${item.imagem || item.image}" alt="${item.nome || item.name}" loading="lazy">
     <div class="menu-item-content">
-      <h3>${item.name}</h3>
-      <p>${item.description}</p>
+      <h3>${item.nome || item.name}</h3>
+      <p>${item.descricao || item.description}</p>
       <div class="menu-item-footer">
-        <span class="price">R$ ${item.price.toFixed(2).replace('.', ',')}</span>
+        <span class="price">R$ ${(item.preco || item.price).toFixed(2).replace('.', ',')}</span>
         <button class="add-to-cart" onclick="addToCart(${item.id})">
           <i class="fas fa-plus"></i>
           Adicionar
@@ -136,12 +90,24 @@ function createMenuItemElement(item) {
 // Add item to cart
 function addToCart(itemId) {
   const item = menuItems.find(item => item.id === itemId);
+  if (!item) return;
+  
   const existingItem = cart.find(cartItem => cartItem.id === itemId);
+  
+  // Normalizar propriedades do item
+  const normalizedItem = {
+    id: item.id,
+    name: item.nome || item.name,
+    description: item.descricao || item.description,
+    price: item.preco || item.price,
+    image: item.imagem || item.image,
+    category: item.categoria || item.category
+  };
   
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    cart.push({ ...item, quantity: 1 });
+    cart.push({ ...normalizedItem, quantity: 1 });
   }
   
   updateCartUI();
@@ -365,7 +331,7 @@ function closeCheckoutModal() {
 }
 
 // Finalizar pedido
-function finishOrder() {
+async function finishOrder() {
   const name = document.getElementById('customer-name').value.trim();
   const phone = document.getElementById('customer-phone').value.trim();
   const address = document.getElementById('customer-address').value.trim();
@@ -382,6 +348,39 @@ function finishOrder() {
   ).join('\n');
   
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  // Salvar pedido no banco de dados
+  try {
+    const pedidoData = {
+      cliente_nome: name,
+      cliente_telefone: phone,
+      cliente_endereco: address,
+      itens: cart.map(item => ({
+        pizza_id: item.id,
+        nome: item.name,
+        quantidade: item.quantity,
+        preco_unitario: item.price,
+        subtotal: item.price * item.quantity
+      })),
+      total: total,
+      forma_pagamento: payment,
+      status: 'pendente'
+    };
+    
+    const result = await databaseService.savePedido(pedidoData);
+    console.log('Pedido salvo:', result);
+    
+    // Enviar SMS de confirmação
+    if (result.success) {
+      await smsService.sendOrderConfirmation(phone, {
+        id: result.id,
+        itens: cart,
+        total: total
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao salvar pedido:', error);
+  }
   
   const paymentMethods = {
     'pix': 'PIX',

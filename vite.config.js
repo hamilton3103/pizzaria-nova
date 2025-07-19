@@ -3,16 +3,17 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   build: {
     rollupOptions: {
-      external: ['mysql2', 'dotenv'],
+      // Remover dependências externas que causam problemas no build
+      external: [],
       output: {
-        globals: {
-          'mysql2': 'mysql2',
-          'dotenv': 'dotenv'
-        }
+        globals: {}
       }
     }
   },
   define: {
     global: 'globalThis',
-  }
+  },
+  // Configurações para build estático
+  base: './',
+  publicDir: 'public'
 })

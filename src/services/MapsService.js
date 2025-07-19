@@ -1,6 +1,6 @@
 export class MapsService {
   constructor() {
-    this.apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    this.apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     this.pizzariaAddress = 'Rua das Pizzas, 123 - Centro, São Paulo - SP';
     this.pizzariaCoords = { lat: -23.5505, lng: -46.6333 }; // Centro de SP
   }
@@ -63,6 +63,21 @@ export class MapsService {
         return;
       }
 
+      // Se não tiver API key, simular carregamento
+      if (!this.apiKey) {
+        console.warn('Google Maps API key não configurada, usando simulação');
+        window.google = {
+          maps: {
+            Map: class MockMap {},
+            Marker: class MockMarker {},
+            InfoWindow: class MockInfoWindow {},
+            DistanceMatrixService: class MockDistanceMatrixService {},
+            Geocoder: class MockGeocoder {}
+          }
+        };
+        resolve();
+        return;
+      }
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKey}&libraries=places`;
       script.async = true;

@@ -1,9 +1,7 @@
-import axios from 'axios';
-
 export class SmsService {
   constructor() {
-    this.apiKey = process.env.SMS_API_KEY;
-    this.baseURL = process.env.SMS_API_URL || 'https://api.smsdev.com.br/v1';
+    this.apiKey = import.meta.env.VITE_SMS_API_KEY;
+    this.baseURL = import.meta.env.VITE_SMS_API_URL || 'https://api.smsdev.com.br/v1';
   }
 
   // Enviar SMS de confirmação de pedido
@@ -49,7 +47,7 @@ export class SmsService {
       }
 
       // Simular envio de SMS (para desenvolvimento)
-      if (!this.apiKey || this.apiKey === 'your_sms_api_key_here') {
+      if (import.meta.env.PROD || !this.apiKey || this.apiKey === 'your_sms_api_key_here') {
         console.log('📱 SMS Simulado para:', cleanPhone);
         console.log('📝 Mensagem:', message);
         
@@ -61,23 +59,31 @@ export class SmsService {
       }
 
       // Envio real via API
-      const response = await axios.post(`${this.baseURL}/send`, {
-        key: this.apiKey,
-        type: 9,
-        number: cleanPhone,
-        msg: message
+      const response = await fetch(`${this.baseURL}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          key: this.apiKey,
+          type: 9,
+          number: cleanPhone,
+          msg: message
+        })
       });
 
-      if (response.data.situacao === 'OK') {
+      const data = await response.json();
+      
+      if (data.situacao === 'OK') {
         return {
           success: true,
-          messageId: response.data.id,
+          messageId: data.id,
           message: 'SMS enviado com sucesso'
         };
       } else {
         return {
           success: false,
-          error: response.data.descricao || 'Erro ao enviar SMS'
+          error: data.descricao || 'Erro ao enviar SMS'
         };
       }
     } catch (error) {
