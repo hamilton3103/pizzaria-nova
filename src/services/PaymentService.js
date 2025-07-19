@@ -42,3 +42,4 @@ class PaymentService {
       }, 1000);
     });
   }
+}

@@ -58,3 +58,4 @@ class MapsService {
       durationValue: parseInt(result.duration) * 60
     });
   }
+}
